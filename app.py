@@ -11,7 +11,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
-# --- Chunked broker fetch ---
+# --- Broker Fetching ---
 def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
     brokers = []
     for start in range(0, total_rows, chunk_size):
@@ -22,64 +22,66 @@ def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000
         brokers.extend(response.data)
     return brokers
 
-# --- Sidebar Filters ---
+# --- Initial Sidebar Setup ---
 st.sidebar.header("Search & Filter")
-search_term = st.sidebar.text_input("Search all brokers (by name or company)")
-city_filter = st.sidebar.multiselect("Filter by city", options=[])
-state_filter = st.sidebar.multiselect("Filter by state", options=[])
-industry_filter = st.sidebar.multiselect("Filter by industry/niche", options=[])
+search_term = st.sidebar.text_input("Search by name or company")
+city_filter, state_filter, industry_filter = [], [], []
 
-search_active = any([search_term, city_filter, state_filter, industry_filter])
+# Load quick sample to generate dropdown options
+sample_data = supabase.table("all_brokers").select("*").range(0, 99).execute().data
+sample_df = pd.DataFrame(sample_data)
+if 'expertise_tags' in sample_df.columns:
+    sample_df['expertise_tags'] = sample_df['expertise_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith("[") else [])
+    tag_options = sorted(set(tag for tags in sample_df['expertise_tags'] for tag in tags))
+else:
+    tag_options = []
 
-# --- Fetch brokers ---
-if search_active:
+# Now populate filter UI
+city_filter = st.sidebar.multiselect("Filter by city", sorted(sample_df['city'].dropna().unique()))
+state_filter = st.sidebar.multiselect("Filter by state", sorted(sample_df['state'].dropna().str.upper().unique()))
+industry_filter = st.sidebar.multiselect("Filter by industry/niche", tag_options)
+
+# Check if filters are active
+filters_active = any([search_term, city_filter, state_filter, industry_filter])
+
+# --- Fetch Data ---
+if filters_active:
     data = fetch_all_brokers("all_brokers")
 else:
-    data = supabase.table("all_brokers").select("*").range(0, 99).execute().data
+    data = sample_data
 
 df = pd.DataFrame(data)
 if df.empty:
-    st.warning("No broker data found.")
+    st.warning("No brokers found.")
     st.stop()
 
 df = df.sort_values(by='leaderboard_score', ascending=False).reset_index(drop=True)
 df['rank'] = df.index + 1
 
-# --- Parse tags ---
+# Reparse tags from full data if available
 if 'expertise_tags' in df.columns:
     df['expertise_tags'] = df['expertise_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith("[") else [])
-    all_tags = sorted(set(tag for sublist in df['expertise_tags'] for tag in sublist))
-else:
-    all_tags = []
 
-# --- Update dropdowns ---
-city_filter = st.sidebar.multiselect("Filter by city", options=sorted(df['city'].dropna().unique()), default=city_filter)
-state_filter = st.sidebar.multiselect("Filter by state", options=sorted(df['state'].dropna().str.upper().unique()), default=state_filter)
-industry_filter = st.sidebar.multiselect("Filter by industry/niche", options=all_tags, default=industry_filter)
-
-# --- Apply Filters ---
-df_filtered = df.copy()
-
+# --- Apply filters ---
 if search_term:
-    df_filtered = df_filtered[df_filtered.apply(
+    df = df[df.apply(
         lambda row: search_term.lower() in str(row.get('broker_name', '')).lower() or
                     search_term.lower() in str(row.get('company_name', '')).lower(), axis=1)]
 
 if city_filter:
-    df_filtered = df_filtered[df_filtered['city'].isin(city_filter)]
+    df = df[df['city'].isin(city_filter)]
 
 if state_filter:
-    df_filtered = df_filtered[df_filtered['state'].str.upper().isin(state_filter)]
+    df = df[df['state'].str.upper().isin(state_filter)]
 
 if industry_filter:
-    df_filtered = df_filtered[df_filtered['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
+    df = df[df['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
 
-# --- Limit top 100 by default
-if not search_active:
-    df_filtered = df_filtered.head(100)
+if not filters_active:
+    df = df.head(100)
 
-# --- Display
-for _, row in df_filtered.iterrows():
+# --- Display Brokers ---
+for _, row in df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
@@ -102,5 +104,5 @@ for _, row in df_filtered.iterrows():
     </div>
     """, unsafe_allow_html=True)
 
-if df_filtered.empty:
-    st.info("No matching brokers found.")
+if df.empty:
+    st.info("No matching brokers.")
