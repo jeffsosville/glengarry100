@@ -33,6 +33,10 @@ listing_counts = listings_df.groupby("broker_id").size().reset_index(name="listi
 listing_counts["broker_id"] = listing_counts["broker_id"].astype(str)
 brokers_df["id"] = brokers_df["id"].astype(str)
 
+st.write("Sample broker_id from listings:", listings_df["broker_id"].dropna().astype(str).unique()[:10])
+st.write("Sample broker id from brokers_df:", brokers_df["id"].dropna().astype(str).unique()[:10])
+
+
 # Merge listing counts into brokers
 brokers_df = brokers_df.merge(listing_counts, how="left", left_on="id", right_on="broker_id")
 brokers_df["listing_count"] = brokers_df["listing_count"].fillna(0).astype(int)
