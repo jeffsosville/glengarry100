@@ -22,6 +22,8 @@ def load_data():
     brokers_df = pd.DataFrame(brokers_resp.data)
     listings_df = pd.DataFrame(listings_resp.data)
     return brokers_df, listings_df
+st.write("Sample listings broker_ids:", listings_df["broker_id"].dropna().astype(str).unique()[:10])
+
 
 brokers_df, listings_df = load_data()
 
