@@ -20,6 +20,7 @@ def load_data():
     brokers_resp = supabase.table("all brokers").select("*").execute()
     listings_resp = supabase.table("bizbuysell_listings_flat").select("*").execute()
     brokers_df = pd.DataFrame(brokers_resp.data)
+    st.write("Broker columns:", brokers_df.columns.tolist())
     listings_df = pd.DataFrame(listings_resp.data)
     return brokers_df, listings_df
 
