@@ -28,7 +28,7 @@ brokers_df, listings_df = load_data()
 
 # Count listings per broker_id
 listing_counts = listings_df.groupby("broker_id").size().reset_index(name="listing_count")
-brokers_df = brokers_df.merge(listing_counts, how="left", left_on="personId", right_on="broker_id")
+brokers_df = brokers_df.merge(listing_counts, how="left", left_on="id", right_on="broker_id")
 brokers_df["listing_count"] = brokers_df["listing_count"].fillna(0).astype(int)
 
 # Sort and display top 100
