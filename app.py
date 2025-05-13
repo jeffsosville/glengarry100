@@ -22,32 +22,27 @@ def load_data():
     brokers_df = pd.DataFrame(brokers_resp.data)
     listings_df = pd.DataFrame(listings_resp.data)
     return brokers_df, listings_df
-    
-st.write("Sample listings broker_ids:", listings_df["broker_id"].dropna().astype(str).unique()[:10])
-
 
 brokers_df, listings_df = load_data()
 
 # Count listings per broker_id
 listing_counts = listings_df.groupby("broker_id").size().reset_index(name="listing_count")
-
-# Ensure both keys are strings before merging
 listing_counts["broker_id"] = listing_counts["broker_id"].astype(str)
-brokers_df["id"] = brokers_df["id"].astype(str)
+brokers_df["person_id"] = brokers_df["person_id"].astype(str)
 
-# Merge listing counts into brokers
-brokers_df = brokers_df.merge(listing_counts, how="left", left_on="id", right_on="broker_id")
+# Merge on correct key (person_id ↔ broker_id)
+brokers_df = brokers_df.merge(listing_counts, how="left", left_on="person_id", right_on="broker_id")
 brokers_df["listing_count"] = brokers_df["listing_count"].fillna(0).astype(int)
 
 # Sort and display top 100
 top_brokers = brokers_df.sort_values("listing_count", ascending=False).head(100).reset_index(drop=True)
 
 for idx, row in top_brokers.iterrows():
-    with st.expander(f"{row['broker_name']} — {row['company_name']} ({row['listing_count']} Listings)"):
+    with st.expander(f"{row['first_name']} {row['last_name']} — {row['company_name']} ({row['listing_count']} Listings)"):
         st.write(f"**Location:** {row.get('city', '')}, {row.get('state', '')}")
         st.write(f"**Phone:** {row.get('phone', 'N/A')}")
 
-        broker_listings = listings_df[listings_df["broker_id"] == row["id"]]
+        broker_listings = listings_df[listings_df["broker_id"].astype(str) == row["person_id"]]
 
         for _, listing in broker_listings.iterrows():
             with st.container():
