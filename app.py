@@ -42,7 +42,7 @@ brokers_df["listing_count"] = brokers_df["listing_count"].fillna(0).astype(int)
 top_brokers = brokers_df.sort_values("listing_count", ascending=False).head(100).reset_index(drop=True)
 
 for idx, row in top_brokers.iterrows():
-    with st.expander(f"{row['firstName']} {row['lastName']} — {row['companyName']} ({row['listing_count']} Listings)"):
+    with st.expander(f"{row['broker_name']} — {row['company_name']} ({row['listing_count']} Listings)"):
         st.write(f"**Location:** {row.get('city', '')}, {row.get('regionCode', '')}")
         st.write(f"**Phone:** {row.get('telephone', 'N/A')}")
 
