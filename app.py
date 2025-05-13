@@ -46,7 +46,7 @@ for idx, row in top_brokers.iterrows():
         st.write(f"**Location:** {row.get('city', '')}, {row.get('regionCode', '')}")
         st.write(f"**Phone:** {row.get('telephone', 'N/A')}")
 
-        broker_listings = listings_df[listings_df["broker_id"] == row["personId"]]
+        broker_listings = listings_df[listings_df["broker_id"] == row["id"]]
 
         for _, listing in broker_listings.iterrows():
             with st.container():
