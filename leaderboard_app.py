@@ -104,7 +104,13 @@ for _, row in df.iterrows():
     </div>
     """, unsafe_allow_html=True)
     if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
-        st.subheader(f"Listings for {broker}")
+    st.subheader(f"Listings for {broker}")
+
+    listings_resp = supabase.table("external_broker_listings") \
+        .select("*") \
+        .eq("broker_name", row.get("broker_name", "")) \
+        .execute()
+
 
     listings_resp = supabase.table("external_broker_listings") \
         .select("*") \
