@@ -129,9 +129,11 @@ for _, row in df.iterrows():
     st.markdown(f"""
     <div style='border:1px solid #333; padding:10px; border-radius:5px; margin-bottom:10px;'>
         <b>{medal} {rank}. <a href='{url}' target='_blank'>{name}</a></b> | {location} | {phone}<br>
-        Active: {active} | Sold: {sold} | Score: {score} | [🔍 View Listings](?company={name})
+        Active: {active} | Sold: {sold} | Score: {score}
     </div>
     """, unsafe_allow_html=True)
+
+    st.link_button(f"🔍 View Listings for {name}", url=f"/?company={name}", use_container_width=True)
 
 if df.empty:
     st.info("No matching brokers.")
