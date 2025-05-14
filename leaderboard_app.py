@@ -81,10 +81,12 @@ if not filters_active:
     df = df.head(100)
 
 # --- Display Brokers ---
+# --- Display Brokers ---
 for _, row in df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
+    raw_broker_name = row.get('broker_name', '')  # use exact match for Supabase
     location = f"{row.get('city', '').title()}, {row.get('state', '').upper()}"
     phone = row.get('phone', '')
     active = row.get('active_listings', 0)
@@ -100,36 +102,27 @@ for _, row in df.iterrows():
     st.markdown(f"""
     <div style='border:1px solid #333; padding:10px; border-radius:5px; margin-bottom:10px;'>
         <b>{medal} {rank}. <a href='{url}' target='_blank'>{name}</a></b> | {location} | {phone}<br>
-        Active: {active} | Sold: {sold} | Score: {score} | <a href='{url}' target='_blank'>View Listings</a>
+        Active: {active} | Sold: {sold} | Score: {score}
     </div>
     """, unsafe_allow_html=True)
+
     if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
         st.subheader(f"Listings for {broker}")
 
-    listings_resp = supabase.table("external_broker_listings") \
-        .select("*") \
-        .eq("broker_name", row.get("broker_name", "")) \
-        .execute()
+        listings_resp = supabase.table("external_broker_listings") \
+            .select("*") \
+            .eq("broker_name", raw_broker_name) \
+            .execute()
 
+        listings = listings_resp.data or []
 
-    listings_resp = supabase.table("external_broker_listings") \
-        .select("*") \
-        .eq("broker_name", broker) \
-        .execute()
-
-    listings = listings_resp.data or []
-
-    if listings:
-        for listing in listings:
-            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
-                st.write(f"**Route Type:** {listing.get('route_type', '')}")
-                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
-                st.write(f"**Status:** {listing.get('status', 'N/A')}")
-                if listing.get('detail_url'):
-                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
-    else:
-        st.info("No listings found for this broker.")
-
-
-if df.empty:
-    st.info("No matching brokers.")
+        if listings:
+            for listing in listings:
+                with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
+                    st.write(f"**Route Type:** {listing.get('route_type', '')}")
+                    st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
+                    st.write(f"**Status:** {listing.get('status', 'N/A')}")
+                    if listing.get('detail_url'):
+                        st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
+        else:
+            st.info("No listings found for this broker.")
