@@ -12,7 +12,7 @@ st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
 # --- Query Params for Listings View ---
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 selected_broker = query_params.get("broker", [None])[0]
 
 # --- Broker Fetching ---
