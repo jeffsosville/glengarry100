@@ -9,11 +9,11 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 st.set_page_config(page_title="The Glengarry 100", layout="wide")
-st.title("🏆 The Glengarry 100")
+st.title("\ud83c\udf1f The Glengarry 100")
 
-# --- Query Params for Listings View ---
+# --- Query Param Detection ---
 query_params = st.query_params
-selected_broker = query_params.get("broker", [None])[0]
+selected_company = query_params.get("company", [None])[0]
 
 # --- Broker Fetching ---
 def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
@@ -25,6 +25,31 @@ def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000
             break
         brokers.extend(response.data)
     return brokers
+
+# --- Listings View ---
+if selected_company:
+    st.markdown("\ud83d\udd19 [Back to Leaderboard](./)")
+    st.subheader(f"Listings for {selected_company}")
+
+    listings_resp = supabase.table("external_broker_listings") \
+        .select("*") \
+        .eq("company_name", selected_company) \
+        .execute()
+
+    listings = listings_resp.data or []
+
+    if listings:
+        for listing in listings:
+            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
+                st.write(f"**Route Type:** {listing.get('route_type', '')}")
+                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
+                st.write(f"**Status:** {listing.get('status', 'N/A')}")
+                if listing.get('detail_url'):
+                    st.markdown(f"[\ud83d\udd17 View Full Listing]({listing['detail_url']})")
+    else:
+        st.info("No listings found for this broker.")
+
+    st.stop()
 
 # --- Initial Sidebar Setup ---
 st.sidebar.header("Search & Filter")
@@ -84,31 +109,6 @@ if industry_filter:
 if not filters_active:
     df = df.head(100)
 
-# --- Listings View ---
-if selected_broker:
-    st.markdown("🔙 [Back to Leaderboard](?)")
-    st.subheader(f"Listings for {selected_broker}")
-
-    listings_resp = supabase.table("external_broker_listings") \
-        .select("*") \
-        .eq("company_name", selected_broker) \
-        .execute()
-
-    listings = listings_resp.data or []
-
-    if listings:
-        for listing in listings:
-            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
-                st.write(f"**Route Type:** {listing.get('route_type', '')}")
-                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
-                st.write(f"**Status:** {listing.get('status', 'N/A')}")
-                if listing.get('detail_url'):
-                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
-    else:
-        st.info("No listings found for this broker.")
-
-    st.stop()
-
 # --- Display Brokers ---
 for _, row in df.iterrows():
     rank = row['rank']
@@ -122,14 +122,14 @@ for _, row in df.iterrows():
     url = row.get('listings_url') or row.get('companyurl') or row.get('companyUrl') or "#"
 
     medal = ""
-    if rank == 1: medal = "🥇"
-    elif rank == 2: medal = "🥈"
-    elif rank == 3: medal = "🥉"
+    if rank == 1: medal = "\ud83e\udd47"
+    elif rank == 2: medal = "\ud83e\udd48"
+    elif rank == 3: medal = "\ud83e\udd49"
 
     st.markdown(f"""
     <div style='border:1px solid #333; padding:10px; border-radius:5px; margin-bottom:10px;'>
         <b>{medal} {rank}. <a href='{url}' target='_blank'>{name}</a></b> | {location} | {phone}<br>
-        Active: {active} | Sold: {sold} | Score: {score} | [🔍 View Listings](?broker={name.replace(' ', '%20')})
+        Active: {active} | Sold: {sold} | Score: {score} | [\ud83d\udd0d View Listings](?company={name})
     </div>
     """, unsafe_allow_html=True)
 
