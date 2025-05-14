@@ -1,4 +1,3 @@
-import urllib.parse
 import streamlit as st
 import pandas as pd
 import ast
@@ -121,8 +120,6 @@ for _, row in df.iterrows():
     sold = row.get('sold_listings', 0)
     score = row.get('leaderboard_score', 0)
     url = row.get('listings_url') or row.get('companyurl') or row.get('companyUrl') or "#"
-    encoded_company = urllib.parse.quote(row.get('company_name', ''))
-
 
     medal = ""
     if rank == 1: medal = "🥇"
