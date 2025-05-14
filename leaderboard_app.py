@@ -11,6 +11,10 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
+# --- Query Params for Listings View ---
+query_params = st.experimental_get_query_params()
+selected_broker = query_params.get("broker", [None])[0]
+
 # --- Broker Fetching ---
 def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
     brokers = []
@@ -80,12 +84,36 @@ if industry_filter:
 if not filters_active:
     df = df.head(100)
 
+# --- Listings View ---
+if selected_broker:
+    st.markdown("🔙 [Back to Leaderboard](?)")
+    st.subheader(f"Listings for {selected_broker}")
+
+    listings_resp = supabase.table("external_broker_listings") \
+        .select("*") \
+        .eq("company_name", selected_broker) \
+        .execute()
+
+    listings = listings_resp.data or []
+
+    if listings:
+        for listing in listings:
+            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
+                st.write(f"**Route Type:** {listing.get('route_type', '')}")
+                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
+                st.write(f"**Status:** {listing.get('status', 'N/A')}")
+                if listing.get('detail_url'):
+                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
+    else:
+        st.info("No listings found for this broker.")
+
+    st.stop()
+
 # --- Display Brokers ---
 for _, row in df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
-    raw_broker_name = row.get('broker_name', '')  # use exact match for Supabase
     location = f"{row.get('city', '').title()}, {row.get('state', '').upper()}"
     phone = row.get('phone', '')
     active = row.get('active_listings', 0)
@@ -101,27 +129,9 @@ for _, row in df.iterrows():
     st.markdown(f"""
     <div style='border:1px solid #333; padding:10px; border-radius:5px; margin-bottom:10px;'>
         <b>{medal} {rank}. <a href='{url}' target='_blank'>{name}</a></b> | {location} | {phone}<br>
-        Active: {active} | Sold: {sold} | Score: {score}
+        Active: {active} | Sold: {sold} | Score: {score} | [🔍 View Listings](?broker={name.replace(' ', '%20')})
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
-        st.subheader(f"Listings for {name}")
-
-    listings_resp = supabase.table("external_broker_listings") \
-        .select("*") \
-        .eq("company_name", row.get("company_name", "")) \
-        .execute()
-
-    listings = listings_resp.data or []
-
-    if listings:
-        for listing in listings:
-            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
-                st.write(f"**Route Type:** {listing.get('route_type', '')}")
-                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
-                st.write(f"**Status:** {listing.get('status', 'N/A')}")
-                if listing.get('detail_url'):
-                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
-    else:
-        st.info("No listings found for this broker.")
+if df.empty:
+    st.info("No matching brokers.")
