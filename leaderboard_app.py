@@ -81,7 +81,6 @@ if not filters_active:
     df = df.head(100)
 
 # --- Display Brokers ---
-# --- Display Brokers ---
 for _, row in df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
@@ -106,23 +105,23 @@ for _, row in df.iterrows():
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
-        st.subheader(f"Listings for {broker}")
+   if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
+    st.subheader(f"Listings for {name}")
 
-        listings_resp = supabase.table("external_broker_listings") \
-            .select("*") \
-            .eq("broker_name", raw_broker_name) \
-            .execute()
+    listings_resp = supabase.table("external_broker_listings") \
+        .select("*") \
+        .eq("company_name", row.get("company_name", "")) \
+        .execute()
 
-        listings = listings_resp.data or []
+    listings = listings_resp.data or []
 
-        if listings:
-            for listing in listings:
-                with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
-                    st.write(f"**Route Type:** {listing.get('route_type', '')}")
-                    st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
-                    st.write(f"**Status:** {listing.get('status', 'N/A')}")
-                    if listing.get('detail_url'):
-                        st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
-        else:
-            st.info("No listings found for this broker.")
+    if listings:
+        for listing in listings:
+            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
+                st.write(f"**Route Type:** {listing.get('route_type', '')}")
+                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
+                st.write(f"**Status:** {listing.get('status', 'N/A')}")
+                if listing.get('detail_url'):
+                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
+    else:
+        st.info("No listings found for this broker.")
