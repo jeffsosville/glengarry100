@@ -103,6 +103,27 @@ for _, row in df.iterrows():
         Active: {active} | Sold: {sold} | Score: {score} | <a href='{url}' target='_blank'>View Listings</a>
     </div>
     """, unsafe_allow_html=True)
+    if st.button(f"🔍 View Listings for {broker}", key=f"view_{rank}"):
+    st.subheader(f"Listings for {broker}")
+
+    listings_resp = supabase.table("external_broker_listings") \
+        .select("*") \
+        .eq("broker_name", broker) \
+        .execute()
+
+    listings = listings_resp.data or []
+
+    if listings:
+        for listing in listings:
+            with st.expander(f"{listing['title']} | {listing['location']} | {listing['asking_price']}"):
+                st.write(f"**Route Type:** {listing.get('route_type', '')}")
+                st.write(f"**Cash Flow:** {listing.get('cash_flow', 'N/A')}")
+                st.write(f"**Status:** {listing.get('status', 'N/A')}")
+                if listing.get('detail_url'):
+                    st.markdown(f"[🔗 View Full Listing]({listing['detail_url']})")
+    else:
+        st.info("No listings found for this broker.")
+
 
 if df.empty:
     st.info("No matching brokers.")
