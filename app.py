@@ -12,8 +12,9 @@ st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
 # --- Broker Fetching ---
+@st.cache_data(ttl=60)  # Cache for 60 seconds; refreshes automatically
 def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
-    brokers = []
+
     for start in range(0, total_rows, chunk_size):
         end = start + chunk_size - 1
         response = supabase.table(table_name).select("*").range(start, end).execute()
