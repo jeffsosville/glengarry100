@@ -41,8 +41,7 @@ df['rank'] = df.index + 1
 if 'expertise_tags' in df.columns:
     df['expertise_tags'] = df['expertise_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith("[") else [])
 
-# Prepare dropdown filter options
-sample_df = df.head(100)
+# Dropdowns
 city_filter = st.sidebar.multiselect("Filter by city", sorted(df['city'].dropna().unique()))
 state_filter = st.sidebar.multiselect("Filter by state", sorted(df['state'].dropna().str.upper().unique()))
 tag_options = sorted(set(tag for tags in df['expertise_tags'] if isinstance(tags, list) for tag in tags))
@@ -67,15 +66,17 @@ if state_filter:
 if industry_filter:
     filtered_df = filtered_df[filtered_df['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
 
+# If no filters, limit to top 100 only
 if not filters_active:
     filtered_df = df.head(100)
 
-# Final display rank reset
-# Preserve original leaderboard rank (from full df)
-filtered = filtered.merge(df[['broker_name', 'company_name', 'rank']], on=['broker_name', 'company_name'], how='left')
+# Preserve original leaderboard rank
+filtered = filtered_df.merge(df[['broker_name', 'company_name', 'rank']], on=['broker_name', 'company_name'], how='left')
 
+if filtered.empty:
+    st.info("No matching brokers.")
+    st.stop()
 
-# --- Display Brokers ---
 # --- Display Brokers ---
 for _, row in filtered.iterrows():
     rank = row['rank']
@@ -99,6 +100,3 @@ for _, row in filtered.iterrows():
         Active: {active} | Sold: {sold} | Score: {score} | <a href='{url}' target='_blank'>View Listings</a>
     </div>
     """, unsafe_allow_html=True)
-
-if filtered_df.empty:
-    st.info("No matching brokers.")
