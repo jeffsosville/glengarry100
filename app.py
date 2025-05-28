@@ -76,7 +76,8 @@ filtered = filtered.merge(df[['broker_name', 'company_name', 'rank']], on=['brok
 
 
 # --- Display Brokers ---
-for _, row in filtered_df.iterrows():
+# --- Display Brokers ---
+for _, row in filtered.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
