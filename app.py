@@ -11,10 +11,15 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
-# --- Broker Fetching ---
-@st.cache_data(ttl=60)  # Cache for 60 seconds; refreshes automatically
-def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
+# --- Force Refresh ---
+if st.sidebar.button("🔄 Force Refresh Data"):
+    st.cache_data.clear()
+    st.experimental_rerun()
 
+# --- Broker Fetching ---
+@st.cache_data(ttl=60)
+def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
+    brokers = []
     for start in range(0, total_rows, chunk_size):
         end = start + chunk_size - 1
         response = supabase.table(table_name).select("*").range(start, end).execute()
@@ -65,9 +70,10 @@ if 'expertise_tags' in df.columns:
 
 # --- Apply filters ---
 if search_term:
+    search_lower = search_term.lower()
     df = df[df.apply(
-        lambda row: search_term.lower() in str(row.get('broker_name', '')).lower() or
-                    search_term.lower() in str(row.get('company_name', '')).lower(), axis=1)]
+        lambda row: search_lower in str(row.get('broker_name') or '').lower() or
+                    search_lower in str(row.get('company_name') or '').lower(), axis=1)]
 
 if city_filter:
     df = df[df['city'].isin(city_filter)]
