@@ -71,8 +71,9 @@ if not filters_active:
     filtered_df = df.head(100)
 
 # Final display rank reset
-filtered_df = filtered_df.reset_index(drop=True)
-filtered_df['rank'] = filtered_df.index + 1
+# Preserve original leaderboard rank (from full df)
+filtered = filtered.merge(df[['broker_name', 'company_name', 'rank']], on=['broker_name', 'company_name'], how='left')
+
 
 # --- Display Brokers ---
 for _, row in filtered_df.iterrows():
