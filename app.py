@@ -46,21 +46,6 @@ city_filter = st.sidebar.multiselect("Filter by city", sorted(df['city'].dropna(
 state_filter = st.sidebar.multiselect("Filter by state", sorted(df['state'].dropna().str.upper().unique()))
 industry_filter = st.sidebar.multiselect("Filter by industry/niche", tag_options)
 
-# --- Apply Search ---
-if search_term:
-    search_lower = search_term.lower()
-    df = df[df.apply(
-        lambda row: search_lower in str(row.get('broker_name') or '').lower() or
-                    search_lower in str(row.get('company_name') or '').lower(), axis=1)]
-
-# --- Apply Other Filters ---
-if city_filter:
-    df = df[df['city'].isin(city_filter)]
-if state_filter:
-    df = df[df['state'].str.upper().isin(state_filter)]
-if industry_filter:
-    df = df[df['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
-
 # --- Dedupe by company_name ---
 df['clean_name'] = df['company_name'].str.lower().str.strip()
 df = df.drop_duplicates(subset='clean_name', keep='first')
@@ -70,8 +55,32 @@ df = df[df['leaderboard_score'].notnull()]
 df = df.sort_values(by='leaderboard_score', ascending=False).reset_index(drop=True)
 df['rank'] = df.index + 1
 
+# --- Save full dataframe for top 100 cutoff ---
+top100_df = df.head(100)
+
+# --- Apply Filters AFTER full sort ---
+filtered_df = df.copy()
+if search_term:
+    search_lower = search_term.lower()
+    filtered_df = filtered_df[filtered_df.apply(
+        lambda row: search_lower in str(row.get('broker_name') or '').lower() or
+                    search_lower in str(row.get('company_name') or '').lower(), axis=1)]
+
+if city_filter:
+    filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
+if state_filter:
+    filtered_df = filtered_df[filtered_df['state'].str.upper().isin(state_filter)]
+if industry_filter:
+    filtered_df = filtered_df[filtered_df['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
+
+# --- Determine display set ---
+if any([search_term, city_filter, state_filter, industry_filter]):
+    display_df = filtered_df
+else:
+    display_df = top100_df
+
 # --- Display Brokers ---
-for _, row in df.iterrows():
+for _, row in display_df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
@@ -94,6 +103,6 @@ for _, row in df.iterrows():
     </div>
     """, unsafe_allow_html=True)
 
-# --- Optional: Debug Data ---
-if st.sidebar.checkbox("Show debug table"):
-    st.dataframe(df[['rank', 'company_name', 'broker_name', 'leaderboard_score', 'listings_url']])
+# --- Optional Debug Table ---
+if st.sidebar.checkbox("Show raw data"):
+    st.dataframe(display_df[['rank', 'company_name', 'broker_name', 'leaderboard_score', 'listings_url']])
