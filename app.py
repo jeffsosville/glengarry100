@@ -14,7 +14,7 @@ st.title("🏆 The Glengarry 100")
 # --- Force Refresh ---
 if st.sidebar.button("🔄 Force Refresh Data"):
     st.cache_data.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # --- Broker Fetching ---
 @st.cache_data(ttl=60)
