@@ -79,7 +79,7 @@ if filtered.empty:
 
 # --- Display Brokers ---
 for _, row in filtered.iterrows():
-    rank = row['rank']
+    rank = int(row['rank']) if 'rank' in row and not pd.isna(row['rank']) else 'N/A'
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
     location = f"{row.get('city', '').title()}, {row.get('state', '').upper()}"
