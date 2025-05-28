@@ -11,7 +11,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 st.set_page_config(page_title="The Glengarry 100", layout="wide")
 st.title("🏆 The Glengarry 100")
 
-# --- Broker Fetching ---
+# --- Fetch All Brokers ---
 def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000):
     brokers = []
     for start in range(0, total_rows, chunk_size):
@@ -22,65 +22,60 @@ def fetch_all_brokers(table_name="all_brokers", total_rows=7500, chunk_size=1000
         brokers.extend(response.data)
     return brokers
 
-# --- Sidebar Filters ---
+# --- Sidebar UI ---
 st.sidebar.header("Search & Filter")
 search_term = st.sidebar.text_input("Search by name or company")
 
-# --- Fetch all brokers fresh every time ---
-data = fetch_all_brokers("all_brokers")
-df = pd.DataFrame(data)
+# Fetch full dataset
+full_data = fetch_all_brokers("all_brokers")
+df = pd.DataFrame(full_data)
+
 if df.empty:
     st.warning("No brokers found.")
     st.stop()
 
-# --- Cleanup + parse tags ---
-if 'expertise_tags' in df.columns:
-    df['expertise_tags'] = df['expertise_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith("[") else [])
-    tag_options = sorted(set(tag for tags in df['expertise_tags'] for tag in tags))
-else:
-    df['expertise_tags'] = [[] for _ in range(len(df))]
-    tag_options = []
-
-# --- Sidebar Filters (dynamic) ---
-city_filter = st.sidebar.multiselect("Filter by city", sorted(df['city'].dropna().unique()))
-state_filter = st.sidebar.multiselect("Filter by state", sorted(df['state'].dropna().str.upper().unique()))
-industry_filter = st.sidebar.multiselect("Filter by industry/niche", tag_options)
-
-# --- Dedupe by company_name ---
-df['clean_name'] = df['company_name'].str.lower().str.strip()
-df = df.drop_duplicates(subset='clean_name', keep='first')
-
-# --- Sort + Rank ---
-df = df[df['leaderboard_score'].notnull()]
+# Rank & Parse
 df = df.sort_values(by='leaderboard_score', ascending=False).reset_index(drop=True)
 df['rank'] = df.index + 1
 
-# --- Save full dataframe for top 100 cutoff ---
-top100_df = df.head(100)
+if 'expertise_tags' in df.columns:
+    df['expertise_tags'] = df['expertise_tags'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith("[") else [])
 
-# --- Apply Filters AFTER full sort ---
+# Prepare dropdown filter options
+sample_df = df.head(100)
+city_filter = st.sidebar.multiselect("Filter by city", sorted(df['city'].dropna().unique()))
+state_filter = st.sidebar.multiselect("Filter by state", sorted(df['state'].dropna().str.upper().unique()))
+tag_options = sorted(set(tag for tags in df['expertise_tags'] if isinstance(tags, list) for tag in tags))
+industry_filter = st.sidebar.multiselect("Filter by industry/niche", tag_options)
+
+filters_active = any([search_term, city_filter, state_filter, industry_filter])
+
+# --- Apply filters ---
 filtered_df = df.copy()
+
 if search_term:
-    search_lower = search_term.lower()
     filtered_df = filtered_df[filtered_df.apply(
-        lambda row: search_lower in str(row.get('broker_name') or '').lower() or
-                    search_lower in str(row.get('company_name') or '').lower(), axis=1)]
+        lambda row: search_term.lower() in str(row.get('broker_name', '')).lower() or
+                    search_term.lower() in str(row.get('company_name', '')).lower(), axis=1)]
 
 if city_filter:
     filtered_df = filtered_df[filtered_df['city'].isin(city_filter)]
+
 if state_filter:
     filtered_df = filtered_df[filtered_df['state'].str.upper().isin(state_filter)]
+
 if industry_filter:
     filtered_df = filtered_df[filtered_df['expertise_tags'].apply(lambda tags: any(tag in tags for tag in industry_filter))]
 
-# --- Determine display set ---
-if any([search_term, city_filter, state_filter, industry_filter]):
-    display_df = filtered_df
-else:
-    display_df = top100_df
+if not filters_active:
+    filtered_df = df.head(100)
+
+# Final display rank reset
+filtered_df = filtered_df.reset_index(drop=True)
+filtered_df['rank'] = filtered_df.index + 1
 
 # --- Display Brokers ---
-for _, row in display_df.iterrows():
+for _, row in filtered_df.iterrows():
     rank = row['rank']
     name = (row.get('company_name') or 'Unknown').title()
     broker = row.get('broker_name', '').title()
@@ -103,6 +98,5 @@ for _, row in display_df.iterrows():
     </div>
     """, unsafe_allow_html=True)
 
-# --- Optional Debug Table ---
-if st.sidebar.checkbox("Show raw data"):
-    st.dataframe(display_df[['rank', 'company_name', 'broker_name', 'leaderboard_score', 'listings_url']])
+if filtered_df.empty:
+    st.info("No matching brokers.")
