@@ -28,6 +28,7 @@ export default function Daily() {
       const { data, error } = await supabase
         .from("daily_listings")
         .select(`
+          .select(`
           id,
           header,
           location,
@@ -36,9 +37,10 @@ export default function Daily() {
           ebitda,
           description,
           urlstub,
-          brokerContactFullName,
-          brokerCompany
-        `)
+  "brokerContactFullName",
+  "brokerCompany"
+`)
+
         .limit(50);
 
       console.log("Listings:", data);
