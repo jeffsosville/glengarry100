@@ -26,7 +26,6 @@ export default function Daily() {
       const { data, error } = await supabase
         .from('"daily listings"') // Escape the table name with space
         .select("*")
-        .order("created_at", { ascending: false })
         .limit(50);
 
       console.log("Listings:", data);
