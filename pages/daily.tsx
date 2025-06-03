@@ -24,7 +24,7 @@ export default function Daily() {
   useEffect(() => {
     async function fetchListings() {
       const { data, error } = await supabase
-        .from("daily listings")
+        .from('"daily listings"')
         .select("*")
         .order("created_at", { ascending: false })
         .limit(50);
