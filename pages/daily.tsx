@@ -8,13 +8,15 @@ const supabase = createClient(
 
 type Listing = {
   id: string;
-  business_name: string;
+  header: string;
   location: string;
-  asking_price?: number;
-  cash_flow?: number;
-  broker_name?: string;
-  broker_id?: string;
-  created_at?: string;
+  price?: number;
+  cashflow?: number;
+  ebitda?: number;
+  description?: string;
+  urlstub?: string;
+  brokerContactFullName?: string;
+  brokerCompany?: string;
 };
 
 export default function Daily() {
@@ -24,8 +26,19 @@ export default function Daily() {
   useEffect(() => {
     async function fetchListings() {
       const { data, error } = await supabase
-        .from("daily_listings") // ✅ clean, renamed table
-        .select("*")
+        .from("daily_listings")
+        .select(`
+          id,
+          header,
+          location,
+          price,
+          cashflow,
+          ebitda,
+          description,
+          urlstub,
+          brokerContactFullName,
+          brokerCompany
+        `)
         .limit(50);
 
       console.log("Listings:", data);
@@ -54,25 +67,41 @@ export default function Daily() {
       ) : (
         listings.map((l) => (
           <div key={l.id} className="border rounded-xl p-4 mb-4 shadow">
-            <h2 className="text-xl font-semibold">{l.business_name}</h2>
-            <p className="text-sm text-gray-600 mb-1">
-              {l.location} —{" "}
-              {l.asking_price ? `Asking: $${l.asking_price.toLocaleString()}` : "No asking price"}
-              {l.cash_flow ? ` | Cash Flow: $${l.cash_flow.toLocaleString()}` : ""}
-            </p>
-            <p className="text-sm text-gray-600">
-              Broker:{" "}
-              {l.broker_id ? (
+            <h2 className="text-xl font-semibold">
+              {l.urlstub ? (
                 <a
-                  href={`/broker/${l.broker_id}`}
+                  href={`https://www.bizbuysell.com/${l.urlstub}`}
+                  target="_blank"
                   className="text-blue-600 hover:underline"
                 >
-                  {l.broker_name || "View Profile"}
+                  {l.header}
                 </a>
               ) : (
-                l.broker_name || "Unknown"
+                l.header
               )}
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-1">
+              {l.location} —{" "}
+              {l.price && <>Price: ${l.price.toLocaleString()} | </>}
+              {l.cashflow && <>Cash Flow: ${l.cashflow.toLocaleString()} | </>}
+              {l.ebitda && <>EBITDA: ${l.ebitda.toLocaleString()}</>}
             </p>
+
+            {l.description && (
+              <p className="text-sm text-gray-700 mb-2 italic">
+                {l.description.length > 180
+                  ? l.description.slice(0, 180) + "…"
+                  : l.description}
+              </p>
+            )}
+
+            {l.brokerContactFullName && (
+              <p className="text-sm text-gray-600">
+                Broker: {l.brokerContactFullName}
+                {l.brokerCompany ? ` — ${l.brokerCompany}` : ""}
+              </p>
+            )}
           </div>
         ))
       )}
