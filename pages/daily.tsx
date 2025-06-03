@@ -24,8 +24,9 @@ export default function Daily() {
   useEffect(() => {
     async function fetchListings() {
       const { data, error } = await supabase
-        .from('"daily listings"') // Escape the table name with space
+        .from("daily_listings") // ✅ clean, renamed table
         .select("*")
+        .order("created_at", { ascending: false })
         .limit(50);
 
       console.log("Listings:", data);
