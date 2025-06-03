@@ -24,11 +24,13 @@ export default function Daily() {
   useEffect(() => {
     async function fetchListings() {
       const { data, error } = await supabase
-      .from('"daily listings"') // ← escape the table name
-      .select("*")
-      .order("created_at", { ascending: false }) // assuming timestamps are correct
-      .limit(50);
+        .from('"daily listings"') // Escape the table name with space
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
 
+      console.log("Listings:", data);
+      console.log("Error:", error);
 
       if (error) {
         console.error("Error loading listings:", error.message);
