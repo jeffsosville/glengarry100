@@ -10,67 +10,65 @@ type Listing = {
   id: string;
   header: string;
   location: string;
-  price?: number;
-  description?: string;
+  price: number;
+  description: string;
 };
 
-export default function Daily() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function DailyListings() {
+  const [listings, setListings] = useState<Listing[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchListings() {
+    const fetchListings = async () => {
       const { data, error } = await supabase
-        .from("public_daily_listings")
-        .select(`
-          id,
-          header,
-          location,
-          price,
-          description
-        `)
+        .from("daily_listings")
+        .select("id, header, location, price, description")
         .limit(50);
 
-      console.log("Listings:", data);
       if (error) {
+        setError(error.message);
         console.error("Error loading listings:", error.message);
+      } else {
+        setListings(data);
+        console.log("Listings:", data);
       }
-      setListings(data || []);
-      setLoading(false);
-    }
+    };
 
     fetchListings();
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">📬 Daily Listings Digest</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">📬 Daily Listings Digest</h1>
 
-      {loading ? (
-        <p>Loading listings...</p>
-      ) : listings.length === 0 ? (
-        <p>No listings found.</p>
-      ) : (
-        listings.map((l) => (
-          <div key={l.id} className="border rounded-xl p-4 mb-4 shadow">
-            <h2 className="text-xl font-semibold text-blue-700 mb-1">
-              {l.header}
-            </h2>
+      {error && (
+        <div className="text-red-500 font-mono mb-4">
+          🧪 Error: {error}
+        </div>
+      )}
 
-            <p className="text-sm text-gray-600 mb-1">
-              {l.location}
-              {l.price ? ` — $${l.price.toLocaleString()}` : ""}
-            </p>
+      {!listings?.length && !error && (
+        <div className="text-gray-500">📬 No listings found.</div>
+      )}
 
-            {l.description && (
-              <p className="text-sm text-gray-700 italic">
-                {l.description.length > 180
-                  ? l.description.slice(0, 180) + "…"
-                  : l.description}
-              </p>
-            )}
-          </div>
-        ))
+      {listings?.length > 0 && (
+        <ul className="space-y-4">
+          {listings.map((listing) => (
+            <li
+              key={listing.id}
+              className="border rounded p-4 shadow hover:bg-gray-50 transition"
+            >
+              <h2 className="text-lg font-semibold">{listing.header}</h2>
+              <p className="text-sm text-gray-600">{listing.location}</p>
+              {listing.price && (
+                <p className="text-green-700 font-bold">
+                  💲{listing.price.toLocaleString()}
+                </p>
+              )}
+              <p className="text-sm mt-2">{listing.description}</p>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
