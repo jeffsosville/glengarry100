@@ -28,7 +28,6 @@ export default function Daily() {
       const { data, error } = await supabase
         .from("daily_listings")
         .select(`
-          .select(`
           id,
           header,
           location,
@@ -37,10 +36,9 @@ export default function Daily() {
           ebitda,
           description,
           urlstub,
-  "brokerContactFullName",
-  "brokerCompany"
-`)
-
+          "brokerContactFullName",
+          "brokerCompany"
+        `)
         .limit(50);
 
       console.log("Listings:", data);
@@ -74,6 +72,7 @@ export default function Daily() {
                 <a
                   href={`https://www.bizbuysell.com/${l.urlstub}`}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
                 >
                   {l.header}
@@ -85,9 +84,9 @@ export default function Daily() {
 
             <p className="text-sm text-gray-600 mb-1">
               {l.location} —{" "}
-              {l.price && <>Price: ${l.price.toLocaleString()} | </>}
-              {l.cashflow && <>Cash Flow: ${l.cashflow.toLocaleString()} | </>}
-              {l.ebitda && <>EBITDA: ${l.ebitda.toLocaleString()}</>}
+              {l.price !== undefined && <>Price: ${l.price.toLocaleString()} | </>}
+              {l.cashflow !== undefined && <>Cash Flow: ${l.cashflow.toLocaleString()} | </>}
+              {l.ebitda !== undefined && <>EBITDA: ${l.ebitda.toLocaleString()}</>}
             </p>
 
             {l.description && (
@@ -98,9 +97,9 @@ export default function Daily() {
               </p>
             )}
 
-            {l.brokerContactFullName && (
+            {(l.brokerContactFullName || l.brokerCompany) && (
               <p className="text-sm text-gray-600">
-                Broker: {l.brokerContactFullName}
+                Broker: {l.brokerContactFullName || "Unknown"}
                 {l.brokerCompany ? ` — ${l.brokerCompany}` : ""}
               </p>
             )}
