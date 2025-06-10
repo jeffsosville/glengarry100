@@ -7,11 +7,16 @@ const supabase = createClient(
 );
 
 type Listing = {
-  id: string;
+  id: number;
   header: string;
   location: string;
   price: number;
+  cashFlow: number;
+  ebitda: number;
   description: string;
+  brokerContactFullName: string;
+  brokerCompany: string;
+  listings_url: string;
 };
 
 export default function DailyListings() {
@@ -21,16 +26,18 @@ export default function DailyListings() {
   useEffect(() => {
     const fetchListings = async () => {
       const { data, error } = await supabase
-        .from("daily_listings")
-        .select("id, header, location, price, description")
-        .limit(50);
+        .from(`"todays listings"`) // escape table with space
+        .select("*")
+        .or("price.not.is.null,cashFlow.not.is.null,ebitda.not.is.null")
+        .not("listings_url", "is", null)
+        .limit(100)
+        .order("created_at", { ascending: false });
 
       if (error) {
         setError(error.message);
         console.error("Error loading listings:", error.message);
       } else {
         setListings(data);
-        console.log("Listings:", data);
       }
     };
 
@@ -38,38 +45,74 @@ export default function DailyListings() {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">📬 Daily Listings Digest</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">🧮 Verified Listings — Today</h1>
 
-      {error && (
-        <div className="text-red-500 font-mono mb-4">
-          🧪 Error: {error}
-        </div>
-      )}
-
+      {error && <div className="text-red-500">Error: {error}</div>}
       {!listings?.length && !error && (
-        <div className="text-gray-500">📬 No listings found.</div>
+        <div className="text-gray-500">Loading verified listings...</div>
       )}
 
-      {listings?.length > 0 && (
-        <ul className="space-y-4">
-          {listings.map((listing) => (
-            <li
-              key={listing.id}
-              className="border rounded p-4 shadow hover:bg-gray-50 transition"
-            >
-              <h2 className="text-lg font-semibold">{listing.header}</h2>
-              <p className="text-sm text-gray-600">{listing.location}</p>
-              {listing.price && (
-                <p className="text-green-700 font-bold">
-                  💲{listing.price.toLocaleString()}
-                </p>
+      <ul className="space-y-6">
+        {listings?.map((listing) => (
+          <li
+            key={listing.id}
+            className="border p-4 rounded-lg shadow hover:bg-gray-50 transition"
+          >
+            <h2 className="text-xl font-semibold mb-1">
+              {listing.listings_url ? (
+                <a
+                  href={listing.listings_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {listing.header || "Untitled Listing"}
+                </a>
+              ) : (
+                listing.header || "Untitled Listing"
               )}
-              <p className="text-sm mt-2">{listing.description}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-1">
+              {listing.location || "Unknown location"}
+            </p>
+
+            {listing.price && (
+              <p className="text-green-700 font-bold">
+                💰 ${listing.price.toLocaleString()}
+              </p>
+            )}
+
+            {listing.cashFlow && (
+              <p className="text-blue-700 text-sm">
+                💵 Cash Flow: ${listing.cashFlow.toLocaleString()}
+              </p>
+            )}
+
+            {listing.ebitda && (
+              <p className="text-blue-500 text-sm">
+                📊 EBITDA: ${listing.ebitda.toLocaleString()}
+              </p>
+            )}
+
+            <p className="text-sm mt-2 text-gray-700">
+              Broker:{" "}
+              <strong>
+                {listing.brokerContactFullName
+                  ? `${listing.brokerContactFullName} (${listing.brokerCompany})`
+                  : "Unknown"}
+              </strong>
+            </p>
+
+            {listing.description && (
+              <p className="text-sm mt-2 text-gray-600 line-clamp-3">
+                {listing.description}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
