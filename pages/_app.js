@@ -1,14 +1,9 @@
-import '../styles/globals.css'; // This imports your global styles, usually Tailwind CSS
+import '../styles/globals.css';
+import Layout from '../components/Layout'; // New import
 
-// Import the Layout component you created
-import Layout from '../components/Layout';
-
-// This is the main Application component for Next.js
-// It wraps all your individual pages
 function MyApp({ Component, pageProps }) {
   return (
-    // Wrap the current page (Component) with your custom Layout
-    <Layout>
+    <Layout> // New wrapper
       <Component {...pageProps} />
     </Layout>
   );
