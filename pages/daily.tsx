@@ -25,12 +25,21 @@ export default function DailyListings() {
 
   useEffect(() => {
     const fetchListings = async () => {
-      const { data, error } = await supabase
-        .from("todays_listings") // ✅ NEW table name
-        .select("*")
-        .or("price.not.is.null,cashFlow.not.is.null,ebitda.not.is.null")
-        .not("listings_url", "is", null)
-        .limit(100); // removed .order("created_at") for safety
+    const { data, error } = await supabase
+    .from("todays_listings")
+    .select("*")
+    .or("price.not.is.null,listings_url.not.is.null")
+    .limit(100)
+    .order("price", { ascending: false });
+
+  if (error) {
+    setError(error.message);
+    console.error("Error loading listings:", error.message);
+  } else {
+    setListings(data);
+  }
+};
+
 
       if (error) {
         setError(error.message);
