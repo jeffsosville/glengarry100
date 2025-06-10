@@ -25,21 +25,12 @@ export default function DailyListings() {
 
   useEffect(() => {
     const fetchListings = async () => {
-    const { data, error } = await supabase
-    .from("todays_listings")
-    .select("*")
-    .or("price.not.is.null,listings_url.not.is.null")
-    .limit(100)
-    .order("price", { ascending: false });
-
-  if (error) {
-    setError(error.message);
-    console.error("Error loading listings:", error.message);
-  } else {
-    setListings(data);
-  }
-};
-
+      const { data, error } = await supabase
+        .from("todays_listings")
+        .select("*")
+        .or("price.not.is.null,listings_url.not.is.null")
+        .limit(100)
+        .order("price", { ascending: false });
 
       if (error) {
         setError(error.message);
@@ -88,30 +79,35 @@ export default function DailyListings() {
 
             {listing.price && (
               <p className="text-green-700 font-bold">
-                💰 ${listing.price.toLocaleString()}
+                💰 ${Number(listing.price).toLocaleString()}
               </p>
             )}
 
             {listing.cashFlow && (
               <p className="text-blue-700 text-sm">
-                💵 Cash Flow: ${listing.cashFlow.toLocaleString()}
+                💵 Cash Flow: ${Number(listing.cashFlow).toLocaleString()}
               </p>
             )}
 
             {listing.ebitda && (
               <p className="text-blue-500 text-sm">
-                📊 EBITDA: ${listing.ebitda.toLocaleString()}
+                📊 EBITDA: ${Number(listing.ebitda).toLocaleString()}
               </p>
             )}
 
-            <p className="text-sm mt-2 text-gray-700">
-              Broker:{" "}
-              <strong>
-                {listing.brokerContactFullName
-                  ? `${listing.brokerContactFullName} (${listing.brokerCompany})`
-                  : "Unknown"}
-              </strong>
-            </p>
+            {listing.brokerCompany || listing.brokerContactFullName ? (
+              <p className="text-sm mt-2 text-gray-700">
+                Broker:{" "}
+                <strong>
+                  {listing.brokerContactFullName
+                    ? `${listing.brokerContactFullName}`
+                    : "Unknown"}{" "}
+                  {listing.brokerCompany
+                    ? `(${listing.brokerCompany})`
+                    : ""}
+                </strong>
+              </p>
+            ) : null}
 
             {listing.description && (
               <p className="text-sm mt-2 text-gray-600 line-clamp-3">
