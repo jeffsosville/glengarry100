@@ -25,20 +25,20 @@ export default function DailyListings() {
 
   useEffect(() => {
     const fetchListings = async () => {
-      const { data, error } = await supabase
-        .from("todays_listings")
-        .select("*")
-        .or("price.not.is.null,listings_url.not.is.null")
-        .limit(100)
-        .order("price", { ascending: false });
+  const { data, error } = await supabase
+    .from("todays_listings")
+    .select("*")
+    .limit(10);
 
-      if (error) {
-        setError(error.message);
-        console.error("Error loading listings:", error.message);
-      } else {
-        setListings(data);
-      }
-    };
+  if (error) {
+    setError(error.message);
+    console.error("Error loading listings:", error.message);
+  } else {
+    console.log("Fetched listings:", data);
+    setListings(data);
+  }
+};
+
 
     fetchListings();
   }, []);
