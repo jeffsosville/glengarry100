@@ -26,7 +26,7 @@ export default function DailyListings() {
   useEffect(() => {
     const fetchListings = async () => {
       const { data, error } = await supabase
-        .from(`"todays listings"`) // escape table with space
+        .from ("todays_listings") // escape table with space
         .select("*")
         .or("price.not.is.null,cashFlow.not.is.null,ebitda.not.is.null")
         .not("listings_url", "is", null)
