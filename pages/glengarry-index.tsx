@@ -37,7 +37,17 @@ export default function GlengarryIndexPage() {
         You're not browsing 52,000 businesses for sale. You're browsing 17,000 maybe real ones.
       </p>
 
-      <p className="mb-8 text-lg font-medium">This is why we built the Glengarry Index.</p>
+      <a
+        href="/data/glengarry_index_audit.csv"
+        download
+        className="inline-block text-blue-600 underline hover:text-blue-800 transition mb-8"
+      >
+        ⬇️ Download Full CSV Audit
+      </a>
+
+      <p className="mb-8 text-lg font-medium">
+        This is why we built the Glengarry Index.
+      </p>
 
       <Link href="/daily">
         <a className="inline-block bg-black text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 transition">
