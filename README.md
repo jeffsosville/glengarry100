@@ -116,6 +116,21 @@ We’re not just a startup. We’re a reckoning.
 
 This is Glengarry. And we’re just getting started.
 
+Project Governance & Contributors
+Glengarry100 is spearheaded by Jeff Sosville, with community contributions welcomed via pull requests, issues, and research submissions.
+
+We operate under a benevolent dictator model to keep the mission focused and high signal:
+
+PRs are welcome
+
+Contributions are openly credited
+
+Final direction, roadmap, and strategic pivots are stewarded by Jeff
+
+Major contributions will be publicly acknowledged on our site and in release notes.
+
+Would you like that added at the bottom of the current README, or under a new heading like ## 🤝 Community & Governance?
+
 📫 Contact / Contribute
 
 Twitter: @glengarry100
