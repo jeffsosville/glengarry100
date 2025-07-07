@@ -1,128 +1,127 @@
-# ⭐ Glengarry100
+Glengarry 100: The Open SMB Marketplace Index
 
-**The open-source trust layer for business brokers.**
-No paywalls. No spam. Just verified listings, public broker rankings, and radical transparency.
+Verified Brokers. Transparent Listings. No Paywalls.
 
-> **"We're building the Wikipedia of business-for-sale marketplaces."**
+🌍 Mission
 
----
+Glengarry100 is the open, verifiable alternative to BizBuySell and CoStar — a transparent, broker-first database of businesses for sale. We spotlight the top 100 brokers by real listing activity, not pay-to-play placement.
 
-## 🚨 Why This Matters
+We believe small business M&A deserves the same openness Wikipedia brought to knowledge and Linux brought to code. Brokers hate paywalls. Buyers hate junk. We're here to fix both.
 
-Brokers are buried under outdated tools, fake leads, and \$1,000/month paywalls to access *their own listings*.
-Meanwhile, buyers can't tell what's real — and sellers drown in spam.
+🔍 What We’ve Built So Far
 
-**Glengarry100 changes that.**
+Daily-scraped listings from brokers sites (via public API scraping)
 
-We track the top 100 brokers by *real listings* — not paid placement.
-And we’re launching the first open-source index of verified businesses for sale.
+Matched listings to known broker websites (~2,000 URLs)
 
----
+Live leaderboard at glengarry100.vercel.app
 
-## 💡 What We're Building
+Master Broker Directory with over 2,000+ brokers (see broker_master_public.csv)
 
-* ✅ **Verified Broker Leaderboard** (live at [glengarry100.vercel.app](https://glengarry100.vercel.app))
-* 🔍 **Daily Matched Listings** (linked directly to broker sites)
-* 📦 **Open JSON & CSV** of real, public business listings
-* 🔐 **Broker Claim Flow** (submit your verified listings)
-* 🔐 **Spider Queue** for franchise brokers like Sunbelt, Transworld, VR, Murphy
-* 🩼 **"Glengarry Index" audit** of stale vs real listings from BizBuySell
+🧠 Core Philosophy
 
----
+Openness over gatekeeping
 
-## 🧱 Repo Structure
+Verification over spam
 
-```bash
-/frontend        # Next.js site (leaderboard, daily feed)
-/lib             # Supabase, JSON loaders, util functions
-/pages           # Leaderboard + /daily route
-bizbuysell_listings.json   # Raw scraped data sample
-.env.local.example         # Example Supabase env
-tailwind.config.js         # UI styling
-```
+Broker-first over pay-to-rank
 
----
+Transparency over clickbait
 
-## 🔜 Coming Soon
+Inspired by the values of:
 
-* `/api/submit-listings` endpoint for verified broker feeds
-* `/broker/[id]` dynamic profiles
-* Franchise broker spiders (Transworld, Sunbelt, Murphy, VR)
-* Public trust scores (based on verified listing volume + freshness)
-* Discord + Community Chat
+🧠 Linus Torvalds: "Good software comes from transparency and iteration."
 
----
+🌐 Jimmy Wales: "Imagine a world in which every person has free access to all knowledge."
 
-## 🤝 How to Contribute
+We're applying those ideas to business buying/selling.
 
-1. **Star this repo**
-2. Fork & clone
-3. `cd frontend && npm install`
-4. `npm run dev`
-5. Open a PR — we’ll review fast
-6. Help improve the spiders, frontend, or data matching
-7. Check the [Issues tab](https://github.com/jeffsosville/glengarry100/issues)
+🚀 What You Can Do
 
-🫠 Have data sources? Know a franchise broker site? Submit them via [Issues](https://github.com/jeffsosville/glengarry100/issues) or PRs!
+🧑‍💻 Developers:
 
----
+Help us build scrapers for major franchise brokers (e.g. Transworld, Sunbelt, Murphy, VR)
 
-## 🔍 Current Data Focus
+Expand our matching engine to connect scraped listings to broker sites
 
-* 2,000+ broker listing URLs (in-progress)
-* Matching each to broker metadata and scraping live data
-* Phase 1 = Broker-only listings
-* Phase 2 = Verified sellers
-* Phase 3 = CRE disruption — yes, we’re coming for that next
+Help us verify listings, deduplicate spam, and analyze relist churn
 
----
+Create tools that let brokers push listings directly via open schema
 
-## 🔓 Our Values
+🕵️‍♂️ Data Detectives:
 
-* **Transparency over Paywalls**
-* **Verification over Volume**
-* **Open Listings > Spam**
-* **Public Data, Forever**
+Help label "zombie listings" or fake listings in our scraped dataset
 
-> “We’re not here to extract rent. We’re here to expose it.”
+Identify brokers with no real activity
 
----
+Help us clean and score the 50,000+ records already scraped
 
-## 🧠 Governance
+📬 Outreach/Community:
 
-* Led by [@jeffsosville](https://github.com/jeffsosville) (benevolent dictator model)
-* Core decisions will always favor transparency, data accuracy, and public trust
-* PRs welcome — final merges will protect mission integrity
-* License: **Apache 2.0** — fork it, build it, just don’t close it
+Join our cold email campaign to franchise offices
 
----
+Submit verified listing sitemaps or direct URLs to speed up matching
 
-## 🧫 Inspired By
+Spread the word on Twitter, Reddit, Hacker News, Indie Hackers, Product Hunt
 
-> “Don’t ever make your users pay to access their own contributions.”
-> — **Jimmy Wales**, Wikipedia
+📊 The Glengarry Index (Coming Soon)
 
-> “You need to be stubborn on vision, flexible on implementation.”
-> — **Paul Graham**, Y Combinator
+A daily-updated transparency report showing:
 
-> “If the data isn’t open, it’s already obsolete.”
-> — **Luis von Ahn**, Duolingo / reCAPTCHA
+Total scraped vs verified listings
 
+Junk/fake/zombie listing count
 
-> “Talk is cheap. Show me the code.”
-> — **Linus Torvalds**, Linux
+Broker leaderboard by real activity
 
----
+CSV export of each day’s snapshot
 
-## 📣 Join the Movement
+🔧 Tech Stack
 
-→ [Twitter](https://twitter.com/jeffsosville)
-→ [glengarry100.vercel.app](https://glengarry100.vercel.app)
-→ \[Substack Coming Soon]
-→ \[Discord Invite Coming Soon]
+Frontend: Next.js + Tailwind + Vercel
 
----
+Backend: Supabase (Postgres + Auth)
 
-> *“Let the brokers take back control. Let the buyers see the truth. Let the data breathe.”*
+Scrapers: Python + curl_cffi + BeautifulSoup + SerpAPI
 
-**No paywalls. No stale listings. No BS. Just trust.**
+Open Data: CSV-based, GitHub-first
+
+🏗️ Future Vision
+
+A public, verified marketplace API — free for buyers, sellers, brokers
+
+Live broker dashboards to claim, manage, and push listings
+
+Broker transparency tools (response time, listing score, reviews)
+
+Expansion into CRE and franchise data
+
+📎 Files in This Repo
+
+broker_master_public.csv: deduped, enriched public broker dataset
+
+bizbuysell_listings.json: current scraped dataset (daily updated)
+
+pages/: frontend pages (/, /daily, /glengarry-index)
+
+components/: leaderboard + broker cards
+
+lib/: Supabase and matching utilities
+
+🙌 Why This Matters
+
+BizBuySell claims 50,000+ listings — but we’ve found only ~8,000 real ones.
+CoStar charges brokers $1,000/month to see their own marketplace.
+We’re not just a startup. We’re a reckoning.
+
+This is Glengarry. And we’re just getting started.
+
+📫 Contact / Contribute
+
+Twitter: @glengarry100
+
+Email: jasosville@gmail.com
+
+Site: glengarry100.vercel.app
+
+"Always be verifying." — Not Alec Baldwin
