@@ -8,6 +8,14 @@ export default function GlengarryIndexPage() {
         We audited all 52,000+ listings on BizBuySell. Here’s what we found—and what it means for anyone serious about buying or selling a business.
       </p>
 
+      <a
+        href="/bizbuysell_listings_daily.csv"
+        download
+        className="inline-block mb-6 text-blue-600 underline hover:text-blue-800"
+      >
+        📥 Download Today's Audit CSV
+      </a>
+
       <div className="overflow-x-auto mb-8">
         <table className="table-auto w-full border-collapse border border-gray-300 text-sm">
           <thead>
@@ -37,17 +45,7 @@ export default function GlengarryIndexPage() {
         You're not browsing 52,000 businesses for sale. You're browsing 17,000 maybe real ones.
       </p>
 
-      <a
-        href="/data/glengarry_index_audit.csv"
-        download
-        className="inline-block text-blue-600 underline hover:text-blue-800 transition mb-8"
-      >
-        ⬇️ Download Full CSV Audit
-      </a>
-
-      <p className="mb-8 text-lg font-medium">
-        This is why we built the Glengarry Index.
-      </p>
+      <p className="mb-8 text-lg font-medium">This is why we built the Glengarry Index.</p>
 
       <Link href="/daily">
         <a className="inline-block bg-black text-white px-6 py-3 rounded-lg shadow hover:bg-gray-800 transition">
