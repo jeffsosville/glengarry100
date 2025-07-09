@@ -129,7 +129,6 @@ Final direction, roadmap, and strategic pivots are stewarded by Jeff
 
 Major contributions will be publicly acknowledged on our site and in release notes.
 
-Would you like that added at the bottom of the current README, or under a new heading like ## 🤝 Community & Governance?
 
 📫 Contact / Contribute
 
